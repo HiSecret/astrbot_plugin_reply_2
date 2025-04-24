@@ -1,9 +1,13 @@
-# helloworld
+# astrbot_plugin_reply
 
-AstrBot 插件模板
+自定义回复插件
 
-A template plugin for AstrBot plugin feature
+通过`/添加自定义回复 关键字|内容`来设置自定义回复
+
+通过`查看所有关键词回复`来查看自定义回复
+
+通过`/删除自定义回复 关键字`来删除自定义回复
+
 
 # 支持
 
-[帮助文档](https://astrbot.app)
