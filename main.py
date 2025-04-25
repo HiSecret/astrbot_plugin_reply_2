@@ -55,8 +55,8 @@ class KeywordReplyPlugin(Star):
             # 去除命令前缀
             args = full_message[len(command_prefix):].strip()
         else:
-            # 尝试其他可能的前缀或直接使用
-            args = full_message.strip()
+            yield event.plain_result("❌ 格式错误，请在消息前添加命令前缀：\"/添加自定义回复\"")
+            return
         
         # 使用第一个"|"作为分隔符
         parts = args.split("|", 1)
