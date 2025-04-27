@@ -1,10 +1,10 @@
 from astrbot.api.all import *
 from astrbot.api.event.filter import command, permission_type, event_message_type, EventMessageType, PermissionType
+from astrbot.api.star import StarTools
+from astrbot.api import logger
 import json
-import logging
 import os
 
-logger = logging.getLogger("KeywordReplyPlugin")
 
 @register(
     name="reply",
@@ -16,9 +16,7 @@ logger = logging.getLogger("KeywordReplyPlugin")
 class KeywordReplyPlugin(Star):
     def __init__(self, context: Context):
         super().__init__(context)
-        # 修复：手动创建插件数据目录
-        plugin_data_dir = os.path.join("data", "plugins", "astrbot_plugin_reply")
-        os.makedirs(plugin_data_dir, exist_ok=True)
+        plugin_data_dir = StarTools.get_data_dir("astrbot_plugin_reply")
         self.config_path = os.path.join(plugin_data_dir, "keyword_reply_config.json")
         self.keyword_map = self._load_config()
         logger.info(f"配置文件路径：{self.config_path}")
@@ -50,14 +48,17 @@ class KeywordReplyPlugin(Star):
         full_message = event.get_message_str()
         
         # 移除命令前缀部分
-        command_prefix = "/添加自定义回复"
-        if full_message.startswith(command_prefix):
-            # 去除命令前缀
-            args = full_message[len(command_prefix):].strip()
+        command_prefix1 = "/添加自定义回复"
+        command_prefix2 = "添加自定义回复 "
+        # 去除命令前缀
+        if full_message.startswith(command_prefix1):
+            args = full_message[len(command_prefix1):].strip()
+        elif full_message.startswith(command_prefix2):
+            args = full_message[len(command_prefix2):].strip()
         else:
             yield event.plain_result("❌ 格式错误，请在消息前添加命令前缀：\"/添加自定义回复\"")
             return
-        
+
         # 使用第一个"|"作为分隔符
         parts = args.split("|", 1)
         if len(parts) != 2:
