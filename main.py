@@ -115,7 +115,7 @@ class KeywordReplyPlugin(Star):
                 reply = reply_match
             else:
                 match, score = process.extractOne(msg, self.keyword_map.keys())
-                if score > 80:  # 相似度阈值  
+                if score > 90:  # 相似度阈值  
                     reply = self.keyword_map[match]
         except Exception as e:
             logger.error(f"自动回复异常: {e}")
@@ -123,12 +123,14 @@ class KeywordReplyPlugin(Star):
 
         logger.info(f"auto_reply: {str(reply)}")
         if reply:
-            yield event.plain_result(reply)
+            event.plain_result(reply)
             # 检查是否为群消息，非群消息不处理
             group_id = event.get_group_id()
+            logger.error(f"撤回消息group_id: {group_id}")
             if not group_id:
                 return
             await asyncio.sleep(60)
+
             self_id = int(event.get_self_id())
             message_id = int(event.message_obj.message_id)
-            yield self.bot.delete_msg(message_id=message_id, self_id=self_id)
+            await self.bot.delete_msg(message_id=message_id, self_id=self_id)
