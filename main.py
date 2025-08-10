@@ -123,7 +123,7 @@ class KeywordReplyPlugin(Star):
 
         logger.info(f"auto_reply: {str(reply)}")
         if reply:
-            event.plain_result(reply)
+            yield event.plain_result(reply)
             # 检查是否为群消息，非群消息不处理
             group_id = event.get_group_id()
             logger.error(f"撤回消息group_id: {group_id}")
