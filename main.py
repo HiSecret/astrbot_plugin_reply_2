@@ -21,7 +21,6 @@ class KeywordReplyPlugin(Star):
         plugin_data_dir = StarTools.get_data_dir("astrbot_plugin_reply")
         self.config_path = os.path.join(plugin_data_dir, "keyword_reply_config.json")
         self.keyword_map = self._load_config()
-        self.bot = CQHttp(context=context)
         logger.info(f"配置文件路径：{self.config_path}")
 
     def _load_config(self) -> dict:
@@ -126,11 +125,12 @@ class KeywordReplyPlugin(Star):
             yield event.plain_result(reply)
             # 检查是否为群消息，非群消息不处理
             group_id = event.get_group_id()
-            logger.error(f"撤回消息group_id: {group_id}")
+            logger.info(f"撤回消息group_id: {group_id}")
             if not group_id:
                 return
             await asyncio.sleep(60)
 
             self_id = int(event.get_self_id())
             message_id = int(event.message_obj.message_id)
-            await self.bot.delete_msg(message_id=message_id, self_id=self_id)
+            logger.info(f"撤回消息self_id: {self_id}, message_id: {message_id}")
+            await event.bot.delete_msg(message_id=message_id, self_id=self_id)
