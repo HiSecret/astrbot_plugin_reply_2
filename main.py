@@ -103,10 +103,7 @@ class KeywordReplyPlugin(Star):
 
     @event_message_type(EventMessageType.ALL)
     async def handle_message(self, event: AstrMessageEvent):
-        # 检查是否被@
-        if not event.is_at_or_wake_command:
-            return
-        
+
         msg = event.message_str.strip().lower()
         # 只进行精确匹配
         if reply := self.keyword_map.get(msg):
