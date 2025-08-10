@@ -2,6 +2,7 @@ from astrbot.api.all import *
 from astrbot.api.event.filter import command, permission_type, event_message_type, EventMessageType, PermissionType
 from astrbot.api.star import StarTools
 from astrbot.api import logger
+from fuzzywuzzy import process
 import json
 import os
 
@@ -103,10 +104,18 @@ class KeywordReplyPlugin(Star):
 
     @event_message_type(EventMessageType.ALL)
     async def handle_message(self, event: AstrMessageEvent):
-
         msg = event.message_str.strip().lower()
-        # 只进行精确匹配
-        if reply := self.keyword_map.get(msg):
+        reply = None
+        try:
+            # 精确匹配  
+            if reply_match := self.keyword_map.get(msg):
+                reply = reply_match
+            else:
+                match, score = process.extractOne(msg, self.keyword_map.keys())
+                if score > 90:  # 相似度阈值  
+                    reply = self.keyword_map[match]
+        except Exception as e:
+            logger.error(f"自动回复异常: {e}")
+            reply = None
+        if reply:
             yield event.plain_result(reply)
-            return
-        # 移除了包含匹配的部分
