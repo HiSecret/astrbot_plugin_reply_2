@@ -6,6 +6,7 @@ from astrbot.api import logger
 from fuzzywuzzy import process
 import json
 import os
+import asyncio
 
 
 @register(
@@ -122,15 +123,29 @@ class KeywordReplyPlugin(Star):
 
         logger.info(f"auto_reply: {str(reply)}")
         if reply:
-            yield event.plain_result(reply)
+            # 发送回复并获取机器人发送的消息对象
+            response = yield event.plain_result(reply)
             # 检查是否为群消息，非群消息不处理
             group_id = event.get_group_id()
             logger.info(f"撤回消息group_id: {group_id}")
             if not group_id:
                 return
+            
+            # 等待60秒后撤回机器人自己的消息
             await asyncio.sleep(60)
 
-            self_id = int(event.get_self_id())
-            message_id = int(event.message_obj.message_id)
-            logger.info(f"撤回消息self_id: {self_id}, message_id: {message_id}")
-            await event.bot.delete_msg(message_id=message_id, self_id=self_id)
+            try:
+                self_id = int(event.get_self_id())
+                # 从响应中获取机器人发送消息的message_id
+                if hasattr(response, 'message_id'):
+                    message_id = int(response.message_id)
+                elif isinstance(response, dict) and 'message_id' in response:
+                    message_id = int(response['message_id'])
+                else:
+                    logger.error("无法获取机器人发送消息的message_id")
+                    return
+                    
+                logger.info(f"撤回消息self_id: {self_id}, message_id: {message_id}")
+                await event.bot.delete_msg(message_id=message_id, self_id=self_id)
+            except Exception as e:
+                logger.error(f"撤回消息失败: {e}")
